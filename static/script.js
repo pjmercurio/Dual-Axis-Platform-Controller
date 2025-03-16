@@ -144,27 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'say yes':
                 sendGCodeSequence('G1 Y15\n G1 Y-15\n G1 Y15\n G1 Y-15');
                 break;
-            case 'draw a dick':
-                sendGCodeSequence(`
-                    G1 Y20
-                    G4 P100
-                    G1 X20
-                    G4 P100
-                    G1 Y-10
-                    G4 P100
-                    G1 X60
-                    G4 P100
-                    G1 Y-20
-                    G4 P100
-                    G1 X-60
-                    G4 P100
-                    G1 Y-10
-                    G4 P100
-                    G1 X-20
-                    G4 P100
-                    G1 Y20`
-                );
-                break;
             case 'do the cha cha slide':
                 sendGCodeSequence(`
                     G1 X15
