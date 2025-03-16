@@ -1,0 +1,137 @@
+body {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    row-gap: 30px;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #2b2b2b, #161616);
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.slider-container {
+    font-size: 14pt;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+}
+
+#slider {
+    width: 300px;
+    margin-top: 10px;
+}
+
+input[type="range"]:focus {
+    outline: none;
+}
+
+.controller {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.horizontal-arrows {
+    display: flex;
+    gap: 20px;
+}
+
+.arrow {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.arrow.up {
+    background-color: #4CAF50; /* Green */
+}
+
+.arrow.down {
+    background-color: #f44336; /* Red */
+}
+
+.arrow.left {
+    background-color: #2196F3; /* Blue */
+}
+
+.arrow.right {
+    background-color: #FF9800; /* Orange */
+}
+
+.arrow:hover {
+    transform: scale(1.1);
+}
+
+.arrow:active {
+    transform: scale(1);
+}
+
+#bottom-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 20px;
+}
+
+.bottom-button {
+    width: 60px;
+    height: 60px;
+    border: none;
+    padding: 10px;
+    font-size: 32px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.bottom-button:hover {
+    transform: scale(1.05);
+}
+
+.mic {
+    background-color: hsl(0, 100%, 86%);
+}
+
+.mic.listening {
+    animation: glowing 750ms infinite alternate ease-in-out;
+}
+
+.fan {
+    background-color: hsl(230, 100%, 78%);
+}
+
+.fan.active svg {
+    animation: spin 1s linear infinite;
+    transform-origin: center;
+}
+
+.camera {
+    background-color: hsl(298, 100%, 68%);
+}
+
+.home {
+    background-color: hsl(59, 100%, 81%);
+}
+
+@keyframes glowing {
+    0% { box-shadow: 0 0 8px 4px rgba(255, 0, 0, 0.7); }
+    100% { box-shadow: 0 0 8px 10px rgba(255, 0, 0, 0.8); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
