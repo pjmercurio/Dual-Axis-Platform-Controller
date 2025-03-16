@@ -13,4 +13,4 @@ A web interface for controlling the X and Y axis stepper motors via serial conne
 - USB Cable
 
 ## Images
-![IMG_3596](https://github.com/user-attachments/assets/7de6132f-d91b-4f61-8b20-8e334445bbea)
+![IMG_3596](https://github.com/user-attachments/assets/bcf455b6-b31d-4500-9bce-d456af8036f1)
