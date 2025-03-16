@@ -14,3 +14,4 @@ A web interface for controlling the X and Y axis stepper motors via serial conne
 
 ## Images
 ![IMG_3596](https://github.com/user-attachments/assets/bcf455b6-b31d-4500-9bce-d456af8036f1)
+<img width="208" alt="Screenshot 2025-03-16 at 7 22 38 PM" src="https://github.com/user-attachments/assets/3937ca79-43f9-4f07-bd09-dc3d8ab44fc5" />
