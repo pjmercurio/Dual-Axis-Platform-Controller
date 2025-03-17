@@ -7,25 +7,29 @@ app = Flask(__name__)
 # Configure serial connection (adjust the port and baudrate for your SKR board)
 SERIAL_PORT = "/dev/cu.usbmodem21101"
 BAUDRATE = 115200
-
-try:
-    ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
-    ser.write(b"M106 S250\n")  # Turn on the fan at full speed
-    ser.flush()
-    ser.write(b"M84 S1\n")  # Disable steppers after 1 second
-    ser.flush()
-    ser.write(b"M211 S0\n")  # Disable software endstops
-    ser.flush()
-    ser.write(b"G91\n")  # Set relative positioning
-    ser.flush()
-    print("SKR board connected and initialized successfully!")
-except Exception as e:
-    print(f"Error connecting to SKR board: {e}")
-    ser = None
+ser = None
 
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/initialize', methods=['POST'])
+def initialize():
+    # Initialize the SKR board
+    try:
+        global ser
+        ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
+        ser.write(b"M106 S250\n")  # Turn on the fan at full speed
+        ser.flush()
+        ser.write(b"M84 S1\n")  # Disable steppers after 1 second
+        ser.flush()
+        ser.write(b"M211 S0\n")  # Disable software endstops
+        ser.flush()
+        ser.write(b"G91\n")  # Set relative positioning
+        ser.flush()
+        return jsonify({"message": "SKR board initialized successfully!", "status": 200}), 200
+    except Exception as e:
+        return jsonify({"message": f"Failed to initialize SKR board: {e}", "status": 500}), 500
 
 @app.route("/send_gcode", methods=["POST"])
 def send_gcode():

@@ -13,12 +13,12 @@
     </div>
 
     <div class="controller">
-        <button class="arrow up" onclick="sendGCode(`G1 Y${getMovementDistance()}`)">▲</button>
+        <button class="arrow up" onclick="sendGCode(`G1 Y${getMovementDistance()} F2000`)">▲</button>
         <div class="horizontal-arrows">
-            <button class="arrow left" onclick="sendGCode(`G1 X-${getMovementDistance()}`)">◀</button>
-            <button class="arrow right" onclick="sendGCode(`G1 X${getMovementDistance()}`)">▶</button>
+            <button class="arrow left" onclick="sendGCode(`G1 X-${getMovementDistance()} F2000`)">◀</button>
+            <button class="arrow right" onclick="sendGCode(`G1 X${getMovementDistance()} F2000`)">▶</button>
         </div>
-        <button class="arrow down" onclick="sendGCode(`G1 Y-${getMovementDistance()}`)">▼</button>
+        <button class="arrow down" onclick="sendGCode(`G1 Y-${getMovementDistance()} F2000`)">▼</button>
     </div>
 
     <div id="bottom-buttons">

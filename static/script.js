@@ -41,30 +41,48 @@ function move(axis, distance) {
     sendGCode(gcode);
 }
 
-document.addEventListener('keydown', (event) => {
-    const distance = getMovementDistance();
-    switch (event.key) {
-        case 'ArrowUp':
-            sendGCode(`G1 Y${distance}`);
-            break;
-        case 'ArrowDown':
-            sendGCode(`G1 Y-${distance}`);
-            break;
-        case 'ArrowLeft':
-            sendGCode(`G1 X-${distance}`);
-            break;
-        case 'ArrowRight':
-            sendGCode(`G1 X${distance}`);
-            break;
-    }
-});
-
 document.addEventListener('DOMContentLoaded', () => {
+    const feedRate = 2000;
     const micButton = document.getElementById('mic-button');
+    const fanButton = document.getElementById('fan-button');
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.continuous = true;
     recognition.lang = 'en-US';
     let isManuallyStopped = false;
+
+    // Initialize SKR board
+    fetch('/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then(response => response.json())
+    .then(response => {
+        console.log('SKR board initialized successfully.');
+        if (response.status === 200) {
+            fanButton.classList.add('active');
+        }
+    })
+    .catch(error => {
+        console.error(error);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        const distance = getMovementDistance();
+        switch (event.key) {
+            case 'ArrowUp':
+                sendGCode(`G1 Y${distance} F${feedRate}`);
+                break;
+            case 'ArrowDown':
+                sendGCode(`G1 Y-${distance} F${feedRate}`);
+                break;
+            case 'ArrowLeft':
+                sendGCode(`G1 X-${distance} F${feedRate}`);
+                break;
+            case 'ArrowRight':
+                sendGCode(`G1 X${distance} F${feedRate}`);
+                break;
+        }
+    });
 
     micButton.addEventListener('click', () => {
         if (micButton.classList.contains('listening')) {
@@ -100,21 +118,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (match) {
             const direction = match[1].toLowerCase();
-            const distance = parseFloat(match[2] === 'to' ? '2' : match[2]);
+            const distance = parseFloat(match[2] === 'to' ? '2' : match[2]); // Speech recognition may return 'to' instead of the number '2'
 
             if (validDirections.includes(direction)) {
                 switch (direction) {
                     case 'up':
-                        sendGCode(`G1 Y${distance}`);
+                        sendGCode(`G1 Y${distance} F${feedRate}`);
                         break;
                     case 'down':
-                        sendGCode(`G1 Y-${distance}`);
+                        sendGCode(`G1 Y-${distance} F${feedRate}`);
                         break;
                     case 'left':
-                        sendGCode(`G1 X-${distance}`);
+                        sendGCode(`G1 X-${distance} F${feedRate}`);
                         break;
                     case 'right':
-                        sendGCode(`G1 X${distance}`);
+                        sendGCode(`G1 X${distance} F${feedRate}`);
                         break;
                 }
             } else {
@@ -127,16 +145,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Handle other commands
         switch (transcript) {
             case 'move up':
-                sendGCode('G1 Y10');
+                sendGCode(`G1 Y10 F${feedRate}`);
                 break;
             case 'move down':
-                sendGCode('G1 Y-10');
+                sendGCode(`G1 Y-10 F${feedRate}`);
                 break;
             case 'move left':
-                sendGCode('G1 X-10');
+                sendGCode(`G1 X-10 F${feedRate}`);
                 break;
             case 'move right':
-                sendGCode('G1 X10');
+                sendGCode(`G1 X10 F${feedRate}`);
                 break;
             case 'say no':
                 sendGCodeSequence('G1 X15\n G1 X-15\n G1 X15\n G1 X-15');
@@ -173,10 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'fan on':
                 sendGCode('M106 S225');
-                document.getElementById('fan-button').classList.add('active');
+                fanButton.classList.add('active');
                 break;
             case 'fan off':
-                document.getElementById('fan-button').classList.remove('active');
+                fanButton.classList.remove('active');
                 sendGCode('M107');
                 break;
             case 'run test':
@@ -191,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Speech recognition error detected:', event.error);
     };
 
-    document.getElementById('fan-button').addEventListener('click', function() {
+    fanButton.addEventListener('click', function() {
         this.classList.toggle('active');
         sendGCode(this.classList.contains('active') ? 'M106 S250' : 'M107');
     });
