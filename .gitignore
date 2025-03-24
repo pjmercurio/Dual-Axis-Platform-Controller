@@ -1,4 +1,6 @@
 .DS_STORE
 __pycache__
 build
-dist
+/dist
+/electron-app/dist
+electron-app/node_modules
