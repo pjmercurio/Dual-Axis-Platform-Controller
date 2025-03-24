@@ -1,3 +1,7 @@
+const fanSpeed = 255;
+let feedRate = 500;
+let distance = 5;
+
 function sendGCode(gcode) {
     fetch('/send_gcode', {
         method: 'POST',
@@ -28,21 +32,18 @@ function sendGCodeSequence(gcode) {
     });
 }
 
-function updateRangeValue(value) {
-    document.getElementById('range-value').innerText = value;
-}
-
 function getMovementDistance() {
-    return parseInt(document.getElementById('slider').value, 10) || 5;
+    return parseInt(document.getElementById('range-slider').value, 10) || 5;
 }
 
 function move(axis, distance) {
-    const gcode = `G0 ${axis}${distance}`;
+    const gcode = `G1 ${axis}${distance} F${feedRate}`;
     sendGCode(gcode);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const feedRate = 2000;
+    const speedSlider = document.getElementById('speed-slider');
+    const rangeSlider = document.getElementById('range-slider');
     const micButton = document.getElementById('mic-button');
     const fanButton = document.getElementById('fan-button');
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
@@ -50,16 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
     recognition.lang = 'en-US';
     let isManuallyStopped = false;
 
-    // Initialize SKR board
-    fetch('/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-    })
-    .then(response => response.json())
+    // Initialize & check SKR board connection status
+    fetch('/initialize') 
     .then(response => {
-        console.log('SKR board initialized successfully.');
         if (response.status === 200) {
-            fanButton.classList.add('active');
+            document.getElementById('connection-status').style.display = 'none';
+            document.getElementById('main-container').style.display = 'contents';
+            console.log('SKR board connected successfully.');
+        } else {
+            const data = response.json();
+            document.getElementById('connection-status').style.display = 'block';
+            document.getElementById('main-container').style.display = 'none';
+            console.error('Error connecting to SKR board:', data.message);
         }
     })
     .catch(error => {
@@ -67,19 +70,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', (event) => {
-        const distance = getMovementDistance();
         switch (event.key) {
             case 'ArrowUp':
-                sendGCode(`G1 Y${distance} F${feedRate}`);
+                move('Y', distance);
                 break;
             case 'ArrowDown':
-                sendGCode(`G1 Y-${distance} F${feedRate}`);
+                move('Y', -distance);
                 break;
             case 'ArrowLeft':
-                sendGCode(`G1 X-${distance} F${feedRate}`);
+                move('X', -distance);
                 break;
             case 'ArrowRight':
-                sendGCode(`G1 X${distance} F${feedRate}`);
+                move('X', distance);
                 break;
         }
     });
@@ -142,6 +144,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Check for draw square command
+        const squarePattern = /^draw (a|an) (\d+(?:\.\d+)?)\s*(millimeter|mm)\s*(square|box)$/i;
+        const squareMatch = transcript.match(squarePattern);
+
+        if (squareMatch) {
+            const sideLength = parseFloat(squareMatch[1]);
+            const gcode = `
+                G1 Y${sideLength} F${feedRate}
+                G4 P2
+                G1 X${sideLength} F${feedRate}
+                G4 P2
+                G1 Y-${sideLength} F${feedRate}
+                G4 P2
+                G1 X-${sideLength} F${feedRate}
+            `;
+            sendGCodeSequence(gcode);
+            return;
+        }
+
         // Handle other commands
         switch (transcript) {
             case 'move up':
@@ -161,6 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'say yes':
                 sendGCodeSequence('G1 Y15\n G1 Y-15\n G1 Y15\n G1 Y-15');
+                break;
+            case 'stop':
+                sendGCode('M84');
                 break;
             case 'do the cha cha slide':
                 sendGCodeSequence(`
@@ -190,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `);
                 break;
             case 'fan on':
-                sendGCode('M106 S225');
+                sendGCode(`M106 S${fanSpeed}`);
                 fanButton.classList.add('active');
                 break;
             case 'fan off':
@@ -211,8 +235,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fanButton.addEventListener('click', function() {
         this.classList.toggle('active');
-        sendGCode(this.classList.contains('active') ? 'M106 S250' : 'M107');
+        sendGCode(this.classList.contains('active') ? `M106 S${fanSpeed}` : 'M107');
     });
+
+    function updateSpeedSliderBackground() {
+        const rawValue = speedSlider.value;
+        const value = (rawValue - speedSlider.min) / (speedSlider.max - speedSlider.min) * 100;
+        feedRate = rawValue;
+        speedSlider.style.background = `linear-gradient(to right,rgb(61, 138, 63) ${value}%, #ddd ${value}%)`;
+        document.getElementById('speed-value').innerText = rawValue;
+    }
+
+    function updateRangeSliderBackground() {
+        const rawValue = rangeSlider.value;
+        const value = (rawValue - rangeSlider.min) / (rangeSlider.max - rangeSlider.min) * 100;
+        distance = rawValue;
+        rangeSlider.style.background = `linear-gradient(to right,rgb(56, 28, 215) ${value}%, #ddd ${value}%)`;
+        document.getElementById('range-value').innerText = rawValue;
+    }
+
+    speedSlider.addEventListener('input', updateSpeedSliderBackground);
+    rangeSlider.addEventListener('input', updateRangeSliderBackground);
+
+    updateSpeedSliderBackground();
+    updateRangeSliderBackground();
 
     document.getElementById('home-button').addEventListener('click', function() {
         this.classList.toggle('active');

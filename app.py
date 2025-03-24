@@ -1,25 +1,51 @@
 from flask import Flask, request, jsonify, render_template
 import serial
 import atexit
+import glob
+import socket
 
 app = Flask(__name__)
 
-# Configure serial connection (adjust the port and baudrate for your SKR board)
-SERIAL_PORT = "/dev/cu.usbmodem21101"
 BAUDRATE = 115200
 ser = None
+
+def get_local_ip():
+    """Find the local IP address of this machine on the network."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))  # Connect to an external server to determine local IP
+        local_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        local_ip = "Unavailable"
+    return local_ip
+
+def find_skr_serial_port():
+    """Finds the SKR board's serial port automatically."""
+    possible_ports = glob.glob('/dev/cu.usbmodem*')  # List all possible SKR board ports
+
+    if possible_ports:
+        print(f"Detected SKR board on {possible_ports[0]}")
+        return possible_ports[0]  # Return the first found port
+    else:
+        return None
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/initialize', methods=['POST'])
+@app.route('/initialize')
 def initialize():
-    # Initialize the SKR board
+    global ser
+    serial_port = find_skr_serial_port()
+    if ser and serial_port:
+        return jsonify({"message": "SKR board already initialized", "status": 200}), 200
     try:
-        global ser
-        ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
-        ser.write(b"M106 S250\n")  # Turn on the fan at full speed
+        if not serial_port:
+            ser = None
+            return jsonify({"message": "SKR board not detected", "status": 500}), 500
+        ser = serial.Serial(serial_port, BAUDRATE, timeout=1)
+        ser.write(b"M106 S255\n")  # Turn on the fan at full speed
         ser.flush()
         ser.write(b"M84 S1\n")  # Disable steppers after 1 second
         ser.flush()
@@ -61,6 +87,19 @@ def send_gcode_sequence():
 
     return jsonify({'status': 'success', 'message': 'G-code sequence sent successfully'})
 
+@app.route("/available-urls")
+def get_available_urls():
+    """Returns the local network URLs where the Flask app is accessible."""
+    local_ip = get_local_ip()
+    
+    urls = {
+        "This Device": "http://localhost:5050",
+        "Other Devices on this Network": f"http://{local_ip}:5050" if local_ip != "Unavailable" else "Not Available"
+    }
+    
+    return jsonify(urls)
+
+@app.route("/cleanup")
 def cleanup():
     print("Cleaning up before exiting...")
     if ser:
@@ -71,4 +110,4 @@ def cleanup():
 atexit.register(cleanup)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5050, debug=False)
