@@ -34,6 +34,12 @@ echo "🛠️💫 Building Electron app..."
 cd electron-app
 npm install
 npm run build
+
+# Step 5: Move Electron build to root dist folder
+echo "📦 Moving Electron build to root build folder..."
+rm -rf ../build/*
+mv dist/mac-arm64/Archaeoptics.app ../build/Archaeoptics.app
+rm -rf dist/mac-arm64
 cd ..
 
 echo "✅ Build complete!"
