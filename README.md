@@ -21,5 +21,9 @@ To build the standalone app, run `./build.sh`. This will first compile the Flask
 
 ## Images
 
-![IMG_3596](https://github.com/user-attachments/assets/bcf455b6-b31d-4500-9bce-d456af8036f1)
-<img height="525" alt="Screenshot 2025-03-16 at 7 22 38 PM" src="https://github.com/user-attachments/assets/1b9d02ae-0ff3-42cd-8240-d48d592a5354" />
+<img height="525" alt="Screenshot 2025-03-16 at 7 22 38 PM" src="https://github.com/user-attachments/assets/658c916f-6e12-439e-a176-e953ea95c08f" />
+
+<img height="525" alt="Screenshot 2025-03-16 at 7 22 38 PM" src="https://github.com/user-attachments/assets/32dad650-8c02-45df-b3a2-e2f008e339c5" />
+
+<img height="400" alt="Screenshot 2025-03-24 at 5 38 48 PM" src="https://github.com/user-attachments/assets/6b1ab9a8-afb6-4f28-8e35-ccb6ed528440" />
+
