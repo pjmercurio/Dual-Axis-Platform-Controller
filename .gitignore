@@ -3,4 +3,4 @@ __pycache__
 build
 /dist
 /electron-app/dist
-electron-app/node_modules
+/electron-app/node_modules
